@@ -56,6 +56,14 @@ public class SudokuGame {
                 }
             }
         }
+
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                if (board.getSpaces().get(row).get(col).getActual() != null) {
+                    board.getSpaces().get(row).get(col).setFixed(true);
+                }
+            }
+        }
     }
 
     private boolean temUnicaSolucao(Board board) {
@@ -86,27 +94,38 @@ public class SudokuGame {
     }
 
     private void iniciarLoopDeJogo() {
-        while (!board.gameIsFinished()) {
+        while (true) { // Loop infinito que controlaremos internamente
             mostrarTabuleiro();
+
+            if (board.hasErrors()) {
+                System.out.println("⚠️ Atenção! Existem erros no tabuleiro (números incorretos).");
+            }
+
+            System.out.println("\nEscolha sua próxima jogada:");
             System.out.println("1 - Inserir número");
             System.out.println("2 - Apagar número");
-            System.out.println("3 - Reiniciar");
+            System.out.println("3 - Reiniciar Jogo");
             System.out.println("4 - Sair");
 
             int opcao = scanner.nextInt();
             switch (opcao) {
                 case 1 -> inserirNumero();
                 case 2 -> apagarNumero();
-                case 3 -> board.reset();
-                case 4 -> System.exit(0);
+                case 3 -> {
+                    iniciar();
+                    return;
+                }
+                case 4 -> {
+                    System.out.println("Obrigado por jogar!");
+                    System.exit(0);
+                }
                 default -> System.out.println("Opção inválida.");
             }
 
             if (board.gameIsFinished()) {
                 mostrarTabuleiro();
-                System.out.println("Parabéns! Você completou o Sudoku!");
-            } else if (board.hasErrors()) {
-                System.out.println("⚠️ Existem erros no tabuleiro!");
+                System.out.println("\n🎉 Parabéns! Você completou o Sudoku corretamente! 🎉");
+                break; // Sai do loop while
             }
         }
     }
@@ -141,7 +160,6 @@ public class SudokuGame {
         System.out.printf(BoardTemplate.BOARD_TEMPLATE, valores.toArray());
     }
 
-
     private void inserirNumero() {
         System.out.print("Linha (0-8): ");
         int row = scanner.nextInt();
@@ -149,7 +167,13 @@ public class SudokuGame {
         int col = scanner.nextInt();
         System.out.print("Valor (1-9): ");
         int valor = scanner.nextInt();
-        board.changeValue(row, col, valor);
+
+        // >> LÓGICA ADICIONADA AQUI <<
+        if (!board.changeValue(row, col, valor)) {
+            System.out.println("\n⚠️ Jogada inválida! Não é possível alterar um número fixo.");
+        } else {
+            System.out.println("Número inserido com sucesso.");
+        }
     }
 
     private void apagarNumero() {
@@ -157,6 +181,12 @@ public class SudokuGame {
         int row = scanner.nextInt();
         System.out.print("Coluna (0-8): ");
         int col = scanner.nextInt();
-        board.clearValue(row, col);
+
+        // >> LÓGICA ADICIONADA AQUI <<
+        if (!board.clearValue(row, col)) {
+            System.out.println("\n⚠️ Jogada inválida! Não é possível apagar um número fixo.");
+        } else {
+            System.out.println("Número apagado com sucesso.");
+        }
     }
 }

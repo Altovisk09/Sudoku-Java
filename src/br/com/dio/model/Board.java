@@ -33,8 +33,8 @@ public class Board {
                 .anyMatch(s -> nonNull(s.getActual()) && !s.getActual().equals(s.getExpected()));
     }
 
-    public boolean changeValue(final int col, final int row, final Integer value){
-        var space = spaces.get(col).get(row);
+    public boolean changeValue(final int row, final int col, final Integer value){
+        var space = spaces.get(row).get(col);
         if(space.isFixed()){
             return false;
         }
@@ -42,8 +42,8 @@ public class Board {
         return true;
     }
 
-    public boolean clearValue(final int col, final int row){
-        var space = spaces.get(col).get(row);
+    public boolean clearValue(final int row, final int col){
+        var space = spaces.get(row).get(col);
         if (space.isFixed()){
             return false;
         }
