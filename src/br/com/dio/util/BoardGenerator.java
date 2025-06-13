@@ -17,8 +17,8 @@ public class BoardGenerator {
 
     private static List<List<Space>> criarMatrizVazia() {
         final int SIZE = 9;
-
         List<List<Space>> matriz = new ArrayList<>();
+
         for (int l = 0; l < SIZE; l++) {
             List<Space> linha = new ArrayList<>();
             for (int c = 0; c < SIZE; c++) {
@@ -26,34 +26,31 @@ public class BoardGenerator {
             }
             matriz.add(linha);
         }
+
         return matriz;
     }
 
     private static boolean preencherTabuleiro(List<List<Space>> spaces, int row, int col) {
-        // 1. se 'row' chegou a 9, o tabuleiro está completo → retorna true
-        if (row == 9) {
-            return true;
-        }
+        // Caso base: tabuleiro completo
+        if (row == 9) return true;
 
-        // 2. 🔄 Calcula a próxima posição:
+        // Calcula próxima posição
         int nextRow = (col == 8) ? row + 1 : row;
         int nextCol = (col + 1) % 9;
 
-        // 3. 🎲 Cria uma lista com os números de 1 a 9 e embaralha para gerar aleatoriedade (Collections.shuffle)
+        // Gera lista de números embaralhados
         List<Integer> numeros = new ArrayList<>(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
         Collections.shuffle(numeros);
 
-        // 4. verifica se o número pode ser colocado nessa célula (isValidPlacement(...))
+        // Tenta preencher a célula com os números disponíveis
         for (Integer num : numeros) {
             if (isValidPlacement(spaces, row, col, num)) {
                 spaces.get(row).get(col).setActual(num);
                 spaces.get(row).get(col).setExpected(num);
 
-                //Recursão
-                if (preencherTabuleiro(spaces, nextRow, nextCol)) {
-                    return true;
-                }
-                // se nao der certo (recursão falhou), faz backtrack
+                if (preencherTabuleiro(spaces, nextRow, nextCol)) return true;
+
+                // Backtracking
                 spaces.get(row).get(col).setExpected(0);
                 spaces.get(row).get(col).clearSpace();
             }
@@ -62,8 +59,8 @@ public class BoardGenerator {
         return false;
     }
 
-    private static boolean isValidPlacement(List<List<Space>> spaces, int row, int col, int value) {
-        //Verifica Linha
+    public static boolean isValidPlacement(List<List<Space>> spaces, int row, int col, int value) {
+        // Verifica linha
         for (int c = 0; c < 9; c++) {
             Integer current = spaces.get(row).get(c).getActual();
             if (current != null && current.equals(value)) return false;
@@ -85,7 +82,24 @@ public class BoardGenerator {
                 if (current != null && current.equals(value)) return false;
             }
         }
+
         return true;
     }
-}
 
+    public static Board clonarBoard(Board board) {
+        List<List<Space>> original = board.getSpaces();
+        List<List<Space>> copia = new ArrayList<>();
+
+        for (List<Space> linhaOriginal : original) {
+            List<Space> novaLinha = new ArrayList<>();
+            for (Space s : linhaOriginal) {
+                Space copiaSpace = new Space(s.getExpected(), s.isFixed());
+                copiaSpace.setActual(s.getActual()); // mantém o valor atual (pode ser null)
+                novaLinha.add(copiaSpace);
+            }
+            copia.add(novaLinha);
+        }
+
+        return new Board(copia);
+    }
+}
